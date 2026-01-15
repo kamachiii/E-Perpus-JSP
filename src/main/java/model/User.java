@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  */
 public class User implements Serializable{
     private int id;
-    private String username, password, fullName, role;
+    private String username, password, fullName, role, email;
     private Timestamp createdAt;
 
     public User() {
@@ -64,6 +64,14 @@ public class User implements Serializable{
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Timestamp getCreatedAt() {

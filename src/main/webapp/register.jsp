@@ -55,12 +55,19 @@
     <div class="card card-custom login-card text-center">
         <div class="card-body p-4">
             <div class="login-logo">
-                <i class="fas fa-book-open"></i>
-            </div>
-            <h4 class="mb-1 fw-bold">E-Library Register</h4>
-            <p class="text-muted mb-4 small">Modern Minimalist Scholar</p>
+                <i class="fas fa-user-plus"></i> </div>
+            <h4 class="mb-1 fw-bold">Create Account</h4>
+            <p class="text-muted mb-4 small">Join E-Library Scholar Today</p>
 
-            <form id="registerForm" action="dashboard.jsp">
+            <% 
+                String error = request.getParameter("error");
+                if ("failed".equals(error)) { 
+            %>
+                <div class="alert alert-danger small p-2">Registrasi gagal! Username mungkin sudah digunakan.</div>
+            <% } %>
+
+            <form id="registerForm" action="auth" method="post">
+                <input type="hidden" name="action" value="register">
                 <div class="row">
                     <div class="col mb-3 text-start">
                         <label for="fullname" class="form-label small fw-bold text-muted ms-3">Full Name</label>
@@ -68,7 +75,7 @@
                             <span class="input-group-text bg-transparent border-0 position-absolute" style="z-index: 10; left: 10px; top: 10px;">
                                 <i class="fas fa-user text-muted"></i>
                             </span>
-                            <input type="text" class="form-control form-control-custom ps-5" id="fullname" placeholder="e.g. John Doe" required>
+                            <input type="text" name="fullname" class="form-control form-control-custom ps-5" id="fullname" placeholder="e.g. John Doe" required>
                         </div>
                     </div>
                     <div class="col mb-3 text-start">
@@ -77,7 +84,7 @@
                             <span class="input-group-text bg-transparent border-0 position-absolute" style="z-index: 10; left: 10px; top: 10px;">
                                 <i class="fas fa-user text-muted"></i>
                             </span>
-                            <input type="text" class="form-control form-control-custom ps-5" id="username" placeholder="Enter your ID" required>
+                            <input type="text" name="username" class="form-control form-control-custom ps-5" id="username" placeholder="Enter your ID" required>
                         </div>
                     </div>
                 </div>
@@ -88,7 +95,7 @@
                             <span class="input-group-text bg-transparent border-0 position-absolute" style="z-index: 10; left: 10px; top: 10px;">
                                 <i class="fas fa-user text-muted"></i>
                             </span>
-                            <input type="text" class="form-control form-control-custom ps-5" id="email" placeholder="student@university.ac.id" required>
+                            <input type="text" name="email" class="form-control form-control-custom ps-5" id="email" placeholder="student@university.ac.id" required>
                         </div>
                     </div>
                     <div class="col mb-4 text-start">
@@ -97,7 +104,7 @@
                             <span class="input-group-text bg-transparent border-0 position-absolute" style="z-index: 10; left: 10px; top: 10px;">
                                 <i class="fas fa-lock text-muted"></i>
                             </span>
-                            <input type="password" class="form-control form-control-custom ps-5" id="password" placeholder="Enter password" required>
+                            <input type="password" name="password" class="form-control form-control-custom ps-5" id="password" placeholder="Enter password" required>
                         </div>
                     </div>
                 </div>
@@ -107,21 +114,12 @@
                 </button>
 
                 <div class="text-center">
-                    <a href="login.jsp" class="text-decoration-none fw-bold" style="color: var(--color-accent);">Sign In</a>
+                    <a href="login" class="text-decoration-none fw-bold" style="color: var(--color-accent);">Sign In</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
     <script src="assets/js/bootstrap.bundle.min.js "></script>
-    <script>
-        // Simple mock login script
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Simulate loading or validation here if needed
-            window.location.href = 'dashboard.jsp';
-        });
-    </script>
 </body>
 </html>

@@ -4,6 +4,8 @@
     Author     : hengk
 --%>
 
+<%@page import="java.util.List"%>
+<%@page import="model.Loan"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String requestUri = request.getRequestURI();
@@ -15,90 +17,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Requests - Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Manage Loans - Admin Panel</title>
+    
+    <link href="<%= request.getContextPath() %>/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    
     <style>
-        /* Reuse Admin Styles */
-        .table-custom { border-collapse: separate; border-spacing: 0; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-soft); }
+        .table-custom {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
         .table-custom thead { background-color: #34495e; color: white; }
         .table-custom th { padding: 16px; font-weight: 600; border: none; }
         .table-custom td { padding: 16px; vertical-align: middle; border-bottom: 1px solid #edf2f7; background-color: white; }
         .table-custom tr:nth-child(even) td { background-color: #f8fafc; }
         .table-custom tr:hover td { background-color: #f1f4f8; }
+        
+        /* Status Badge Style */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-borrowed { background-color: #fff3cd; color: #856404; }
+        .status-returned { background-color: #d4edda; color: #155724; }
+        
         .sidebar { height: 100vh; background-color: white; border-right: 1px solid #eee; position: sticky; top: 0; }
         .nav-link-admin { color: #7f8c8d; padding: 12px 20px; border-radius: 8px; margin-bottom: 4px; font-weight: 500; text-decoration: none; display: block; }
-        .nav-link-admin:hover, .nav-link-admin.active { background-color: #ecf3fe; color: var(--color-accent); }
+        .nav-link-admin:hover, .nav-link-admin.active { background-color: #ecf3fe; color: #0d6efd; }
     </style>
 </head>
-<body class="bg-soft">
+<body class="bg-light">
+
     <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar d-none d-lg-block p-4" style="width: 260px;">
-            <div class="d-flex align-items-center mb-5">
-                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
-                    <i class="fas fa-shield-alt"></i>
-                 </div>
-                 <h5 class="fw-bold mb-0">Admin Panel</h5>
-            </div>
-            <nav class="nav flex-column">
-                <a class="nav-link-admin <%= currentPage.equals("/admin/dashboard.jsp") ? "active" : "" %>" href="dashboard.jsp"><i class="fas fa-book me-2"></i> Manage Books</a>
-                <a class="nav-link-admin <%= currentPage.equals("/admin/categories.jsp") ? "active" : "" %>" href="categories.jsp"><i class="fas fa-layer-group me-2"></i> Categories</a>
-                <a class="nav-link-admin <%= currentPage.equals("/admin/users.jsp") ? "active" : "" %>" href="users.jsp"><i class="fas fa-users me-2"></i> Users</a>
-                <a class="nav-link-admin <%= currentPage.equals("/admin/loans.jsp") ? "active" : "" %>" href="loans.jsp"><i class="fas fa-clipboard-list me-2"></i> Loan Requests</a>
-                <a class="nav-link-admin <%= currentPage.equals("/admin/reports.jsp") ? "active" : "" %>" href="reports.jsp"><i class="fas fa-chart-pie me-2"></i> Reports</a>
-            </nav>
-            <div class="mt-auto pt-5">
-                <a href="<%= request.getContextPath() %>/login.jsp" class="nav-link-admin text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
-            </div>
-        </div>
+        <%@include file="../includes/sidebar.jsp" %>
 
-        <!-- Main Content -->
         <div class="flex-grow-1 p-4 p-md-5">
-            <h2 class="h4 fw-bold mb-4">Loan Requests</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                   <h2 class="h4 fw-bold">Loan Management</h2>
+                   <p class="text-muted small">Monitor active loans and process returns.</p>
+                </div>
+                <a href="<%= request.getContextPath() %>/loans?action=list" class="btn btn-outline-primary btn-sm"><i class="fas fa-sync-alt me-2"></i>Refresh Data</a>
+            </div>
 
-            <div class="card card-custom p-0">
+            <div class="card border-0 shadow-sm p-0 rounded-4 overflow-hidden">
                 <table class="table-custom mb-0">
                     <thead>
                         <tr>
-                            <th>User</th>
-                            <th>Book Requested</th>
-                            <th>Date</th>
-                            <th>Duration</th>
-                            <th class="text-end">Decision</th>
+                            <th>ID</th>
+                            <th>Member Name</th>
+                            <th>Book Title</th>
+                            <th>Loan Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <%
+                            List<Loan> loans = (List<Loan>) request.getAttribute("loanList");
+                            
+                            if (loans != null && !loans.isEmpty()) {
+                                for (Loan l : loans) {
+                                    boolean isBorrowed = "borrowed".equalsIgnoreCase(l.getStatus());
+                        %>
                         <tr>
-                            <td>Scholar User</td>
-                            <td class="fw-bold">System Design Interview</td>
-                            <td>Today, 10:30 AM</td>
-                            <td>7 Days</td>
+                            <td class="text-muted">#<%= l.getId() %></td>
+                            <td class="fw-bold text-dark"><%= l.getMemberName() %></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <% if(l.getBookCover() != null) { %>
+                                        <img src="<%= request.getContextPath() %>/uploads/<%= l.getBookCover() %>" class="rounded me-2" style="width: 30px; height: 40px; object-fit: cover;">
+                                    <% } else { %>
+                                        <i class="fas fa-book text-muted me-2"></i>
+                                    <% } %>
+                                    <%= l.getBookTitle() %>
+                                </div>
+                            </td>
+                            <td><%= l.getLoanDate() %></td>
+                            <td>
+                                <% if(isBorrowed) { %>
+                                    <span class="text-danger fw-bold"><%= l.getDueDate() %></span>
+                                <% } else { %>
+                                    <span class="text-muted"><%= l.getDueDate() %></span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if(isBorrowed) { %>
+                                    <span class="status-badge status-borrowed"><i class="fas fa-clock me-1"></i> Active</span>
+                                <% } else { %>
+                                    <span class="status-badge status-returned"><i class="fas fa-check-circle me-1"></i> Returned</span>
+                                    <br><small class="text-muted" style="font-size: 0.75rem;">on <%= l.getReturnDate() %></small>
+                                <% } %>
+                            </td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-success rounded-pill px-3 me-1" onclick="this.closest('tr').remove()"><i class="fas fa-check"></i></button>
-                                <button class="btn btn-sm btn-danger rounded-pill px-3" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button>
+                                <% if(isBorrowed) { %>
+                                    <a href="<%= request.getContextPath() %>/loans?action=return&id=<%= l.getId() %>&book_id=<%= l.getBookId() %>" 
+                                       class="btn btn-success btn-sm rounded-pill px-3"
+                                       onclick="return confirm('Proses pengembalian buku ini?')">
+                                        <i class="fas fa-undo-alt me-1"></i> Return
+                                    </a>
+                                <% } else { %>
+                                    <button class="btn btn-secondary btn-sm rounded-pill px-3" disabled>Completed</button>
+                                <% } %>
                             </td>
                         </tr>
-                         <tr>
-                            <td>John Doe</td>
-                            <td class="fw-bold">Harry Potter</td>
-                            <td>Yesterday</td>
-                            <td>14 Days</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-success rounded-pill px-3 me-1" onclick="this.closest('tr').remove()"><i class="fas fa-check"></i></button>
-                                <button class="btn btn-sm btn-danger rounded-pill px-3" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button>
-                            </td>
-                        </tr>
+                        <% 
+                                } 
+                            } else { 
+                        %>
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <img src="<%= request.getContextPath() %>/assets/images/empty.svg" style="width: 80px; opacity: 0.5;" class="mb-3 d-block mx-auto">
+                                    Belum ada data peminjaman.
+                                </td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
-                <div class="p-4 text-center text-muted small">
-                    End of pending requests.
-                </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="<%= request.getContextPath() %>/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

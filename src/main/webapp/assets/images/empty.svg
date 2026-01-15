@@ -1,0 +1,19 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="90" fill="#F8F9FA"/>
+    
+    <path d="M60 70L100 50L140 70V130L100 150L60 130V70Z" fill="#E2E8F0"/>
+    
+    <path d="M60 70L100 90L140 70" stroke="#CBD5E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M100 90V150" stroke="#CBD5E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <path d="M60 70L40 60L80 40L100 50L60 70Z" fill="#CBD5E0" opacity="0.8"/>
+    
+    <path d="M140 70L160 60L120 40L100 50L140 70Z" fill="#A0AEC0" opacity="0.8"/>
+    
+    <circle cx="115" cy="85" r="20" stroke="#718096" stroke-width="4" fill="white"/>
+    <path d="M100 100L90 110" stroke="#718096" stroke-width="4" stroke-linecap="round"/>
+    
+    <circle cx="50" cy="140" r="3" fill="#CBD5E0"/>
+    <circle cx="160" cy="120" r="2" fill="#CBD5E0"/>
+    <circle cx="150" cy="150" r="4" fill="#CBD5E0"/>
+</svg>

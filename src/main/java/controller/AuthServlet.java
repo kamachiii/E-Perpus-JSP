@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
 import dao.UserDAO;
@@ -14,12 +10,43 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-/**
- *
- * @author hengk
- */
-@WebServlet(name = "AuthServlet", urlPatterns = {"/auth"})
-public class AuthServlet extends HttpServlet{
+@WebServlet(name = "AuthServlet", urlPatterns = {"/auth", "/login", "/register", "/logout"})
+public class AuthServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String path = request.getServletPath();
+
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("currentUser") != null) {
+            if ("/login".equals(path) || "/register".equals(path)) {
+                User user = (User) session.getAttribute("currentUser");
+                if ("admin".equals(user.getRole())) {
+                    response.sendRedirect("admin/dashboard");
+                } else {
+                    response.sendRedirect("dashboard");
+                }
+                return;
+            }
+        }
+
+        switch (path) {
+            case "/login":
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                break;
+            case "/register":
+                request.getRequestDispatcher("register.jsp").forward(request, response);
+                break;
+            case "/logout":
+                logout(request, response);
+                break;
+            default:
+                response.sendRedirect("login");
+                break;
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -29,53 +56,43 @@ public class AuthServlet extends HttpServlet{
         UserDAO userDAO = new UserDAO();
 
         if ("login".equals(action)) {
-            // 1. Ambil data dari form [cite: 296]
-            String uName = request.getParameter("username");
-            String uPass = request.getParameter("password");
-
-            // 2. Panggil DAO
-            User user = userDAO.login(uName, uPass);
-
+            User user = userDAO.login(request.getParameter("username"), request.getParameter("password"));
             if (user != null) {
-                // 3. Login Sukses: Buat Session [cite: 441]
                 HttpSession session = request.getSession();
-                session.setAttribute("currentUser", user); // Simpan objek user ke session
+                session.setAttribute("currentUser", user);
                 
-                // Redirect berdasarkan role (Opsional)
-                response.sendRedirect("index.jsp"); 
+                // Redirect ke URL Servlet (Bukan JSP)
+                if ("admin".equals(user.getRole())) {
+                    response.sendRedirect("admin/dashboard"); 
+                } else {
+                    response.sendRedirect("dashboard");
+                }
             } else {
-                // 4. Login Gagal
-                response.sendRedirect("login.jsp?error=invalid");
+                response.sendRedirect("login?error=invalid");
             }
-
         } else if ("register".equals(action)) {
-            // Logika Register
             User newUser = new User();
+            newUser.setFullName(request.getParameter("fullname"));
+            newUser.setEmail(request.getParameter("email"));
             newUser.setUsername(request.getParameter("username"));
             newUser.setPassword(request.getParameter("password"));
-            newUser.setFullName(request.getParameter("fullname"));
-            newUser.setRole("member"); // Default role
+            newUser.setRole("member");
 
             if(userDAO.register(newUser)) {
-                response.sendRedirect("login.jsp?msg=registered");
+                response.sendRedirect("login?msg=registered");
             } else {
-                response.sendRedirect("register.jsp?error=failed");
+                response.sendRedirect("register?error=failed");
             }
+        } else if ("updateProfile".equals(action)) {
+             // ... (kode update profile sama, pastikan redirectnya ke 'profile') ...
+             // response.sendRedirect("profile?msg=updated");
         }
+        // ... dst
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        String action = request.getParameter("action");
-        if ("logout".equals(action)) {
-            // Logika Logout
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                session.invalidate(); // Hapus session [cite: 452]
-            }
-            response.sendRedirect("login.jsp");
-        }
+    private void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        if (session != null) session.invalidate();
+        response.sendRedirect("login"); // URL Bersih
     }
 }

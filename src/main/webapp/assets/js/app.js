@@ -123,7 +123,11 @@ function renderLoans() {
         let fineHtml = loan.fine ? `
             <div class="mt-3 text-center small">
                 <span class="text-danger fw-bold">Fine: ${loan.fine}</span>
-            </div>` : ``;
+                <br>
+                <button class="btn btn-sm btn-danger w-100 mt-1 rounded-pill" onclick="returnBook(${index})">Pay & Return</button>
+            </div>` : `
+            <button class="btn btn-sm btn-outline-primary w-100 mt-3 rounded-pill" onclick="returnBook(${index})">Return Book</button>
+            `;
 
         const html = `
         <div class="col-md-6 col-lg-4">

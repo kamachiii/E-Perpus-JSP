@@ -59,15 +59,32 @@
             </div>
             <h4 class="mb-1 fw-bold">E-Library Login</h4>
             <p class="text-muted mb-4 small">Modern Minimalist Scholar</p>
+            
+            <% 
+                String error = request.getParameter("error");
+                if ("invalid".equals(error)) { 
+            %>
+                <div class="alert alert-danger small p-2">Username atau Password salah!</div>
+            <% } %>
+            
+            <% 
+                String msg = request.getParameter("msg");
+                if ("registered".equals(msg)) { 
+            %>
+                <div class="alert alert-success small p-2">Akun berhasil dibuat, silakan login.</div>
+            <% } %>
 
-            <form id="loginForm" action="dashboard.jsp">
+            <form id="loginForm" action="auth" method="post">
+                
+                <input type="hidden" name="action" value="login">
+
                 <div class="mb-3 text-start">
                     <label for="username" class="form-label small fw-bold text-muted ms-3">Username</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-0 position-absolute" style="z-index: 10; left: 10px; top: 10px;">
                             <i class="fas fa-user text-muted"></i>
                         </span>
-                        <input type="text" class="form-control form-control-custom ps-5" id="username" placeholder="Enter your ID" required>
+                        <input type="text" name="username" class="form-control form-control-custom ps-5" id="username" placeholder="Enter your ID" required>
                     </div>
                 </div>
                 <div class="mb-4 text-start">
@@ -76,7 +93,7 @@
                         <span class="input-group-text bg-transparent border-0 position-absolute" style="z-index: 10; left: 10px; top: 10px;">
                             <i class="fas fa-lock text-muted"></i>
                         </span>
-                        <input type="password" class="form-control form-control-custom ps-5" id="password" placeholder="Enter password" required>
+                        <input type="password" name="password" class="form-control form-control-custom ps-5" id="password" placeholder="Enter password" required>
                     </div>
                 </div>
 
@@ -85,13 +102,12 @@
                 </button>
 
                 <div class="text-center">
-                    <a href="register.jsp" class="text-decoration-none fw-bold" style="color: var(--color-accent);">Sign Up</a>
+                    <a href="register" class="text-decoration-none fw-bold" style="color: var(--color-accent);">Sign Up</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
     <script src="assets/js/bootstrap.bundle.min.js "></script>
 </body>
 </html>
